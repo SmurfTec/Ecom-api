@@ -11,7 +11,7 @@ DB_URL = DB_URL.replace('<DB_NAME>', process.env.DB_NAME);
 if (process.argv[2] && process.argv[2] === 'dblocal')
   DB_URL = DBLocal;
 
-console.log(`DB_URL`, DB_URL);
+// console.log(`DB_URL`, DB_URL);
 
 module.exports = () => {
   console.log('connecting to DB...');

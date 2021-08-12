@@ -8,10 +8,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const path = require('path');
 const hpp = require('hpp');
-
-const globalErrorHandler = require('./middlewares/globalErrorHandler');
-
-const AppError = require('./utils/appError');
+const products = require('./data/products');
 
 // view engine setup
 app.set('view engine', 'ejs');
@@ -56,29 +53,19 @@ app.use((req, res, next) => {
   next();
 });
 
-
 app.get('/', (req, res) => {
   res.send(' api is running ');
   console.log('gotit');
 });
 
 app.get('/api/products', (req, res) => {
+  console.log(`products`, products);
   res.json(products);
 });
+
 app.get('/api/product/:id', (req, res) => {
   const product = products.find((p) => p._id === req.params.id);
   res.json(product);
 });
 
-
-// handling all (get,post,update,delete.....) unhandled routes
-
-app.all('*', (req, res, next) => {
-  next(
-    new AppError(`Can't find ${req.originalUrl} on the server`, 404)
-  );
-});
-
-// error handling middleware
-app.use(globalErrorHandler);
 module.exports = app;
