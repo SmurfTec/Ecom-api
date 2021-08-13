@@ -9,6 +9,11 @@ const xss = require('xss-clean');
 const path = require('path');
 const hpp = require('hpp');
 const products = require('./data/products');
+const productRoutes = require('./routes/productsRoutes');
+const userRoutes = require('./routes/userRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+
+const { notFound, errorHandler } = require('./middleware/Error');
 
 // view engine setup
 app.set('view engine', 'ejs');
@@ -53,19 +58,13 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/', (req, res) => {
-  res.send(' api is running ');
-  console.log('gotit');
-});
 
-app.get('/api/products', (req, res) => {
-  console.log(`products`, products);
-  res.json(products);
-});
+app.use('/api/products', productRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/orders', orderRoutes);
 
-app.get('/api/product/:id', (req, res) => {
-  const product = products.find((p) => p._id === req.params.id);
-  res.json(product);
-});
+app.use(notFound);
+app.use(errorHandler);
+
 
 module.exports = app;
