@@ -30,7 +30,7 @@ const productSchema = mongoose.Schema(
     countInStock: { type: Number, require: true, default: 0 },
   },
   {
-    timestamp: true,
+    timestamps: true,
   }
 );
 
