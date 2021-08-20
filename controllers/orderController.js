@@ -12,7 +12,7 @@ const addOrderItems = catchAsync(async (req, res) => {
     shippingPrice,
     totalPrice,
   } = req.body;
-  const payment_Method=paymentMethod.paymentMethod
+  const payment_Method = paymentMethod.paymentMethod;
 
   if (orderItems && orderItems.length === 0) {
     res.status(400);
@@ -24,7 +24,7 @@ const addOrderItems = catchAsync(async (req, res) => {
       orderItems,
       user: req.user._id,
       shippingAddress,
-      paymentMethod:payment_Method, 
+      paymentMethod: payment_Method,
       itemsPrice,
       taxPrice,
       shippingPrice,
@@ -57,22 +57,15 @@ const updateOrderToPaid = catchAsync(async (req, res) => {
   if (order) {
     order.isPaid = true;
     order.paidAt = Date.now();
-    
-    
-    // console.log('body',req,body)
-    // const payerID=req.body.id
-    // console.log(payerID)
-    // console.log(typeof payerID)
-    
-    
+
     //* this comes from the paypal response
-    order.paymentResult={
-        id:req.body.id,
-        status:req.body.status,
-        update_time:req.body.update_time,
-        email_address:req.body.payer.email_address
-    }
-    
+    order.paymentResult = {
+      id: req.body.id,
+      status: req.body.status,
+      update_time: req.body.update_time,
+      email_address: req.body.payer.email_address,
+    };
+
     const updatedOrder = await order.save();
     res.status(200).json(updatedOrder);
   } else {
@@ -81,17 +74,43 @@ const updateOrderToPaid = catchAsync(async (req, res) => {
   }
 });
 
-//  get my order
-const getMyOrders=catchAsync(async(req,res)=>{
-  // console.log(req.user)
-  const orders=await Order.find({user:req.user._id})
+// update order to Delivered
+const updateOrderToDelivered = catchAsync(async (req, res) => {
+  const order = await Order.findById(req.params.id);
 
-  res.json(orders)
-})
+  if (order) {
+    order.isDelivered = true;
+    order.deliveredAt = Date.now();
+
+    const updatedOrder = await order.save();
+    res.status(200).json(updatedOrder);
+    console.log('successsss');
+  } else {
+    res.status(404);
+    throw new Error('Order not found');
+  }
+});
+
+//  get my order
+const getMyOrders = catchAsync(async (req, res) => {
+  // console.log(req.user)
+  const orders = await Order.find({ user: req.user._id });
+
+  res.json(orders);
+});
+
+//  get all order
+const getOrders = catchAsync(async (req, res) => {
+  // console.log(req.user)
+  const orders = await Order.find().populate('user', 'id name');
+  res.json(orders);
+});
 
 module.exports = {
   addOrderItems,
   getOrderById,
   updateOrderToPaid,
-  getMyOrders
+  getMyOrders,
+  getOrders,
+  updateOrderToDelivered,
 };

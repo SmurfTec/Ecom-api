@@ -1,21 +1,23 @@
 const express = require('express');
 const app = express();
+const path = require('path');
 const cors = require('cors');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
-const path = require('path');
 const hpp = require('hpp');
 const products = require('./data/products');
 const productRoutes = require('./routes/productsRoutes');
 const userRoutes = require('./routes/userRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 
 const { notFound, errorHandler } = require('./middleware/Error');
 
 // view engine setup
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -58,16 +60,19 @@ app.use((req, res, next) => {
   next();
 });
 
-
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/upload', uploadRoutes);
 
 app.get('/api/config/paypal', (req, res) =>
   res.send(process.env.PAYPAL_CLIENT_ID)
 );
+
+// const __dirname = path.resolve();
+app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+
 app.use(notFound);
 app.use(errorHandler);
-
 
 module.exports = app;
