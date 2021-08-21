@@ -3,20 +3,28 @@ const Product = require('../models/productModel');
 
 // get all products
 const getProducts = catchAsync(async (req, res) => {
+  const pageSize = 3;
+  const page = Number(req.query.pageNumber) || 1;
 
-  const keyword=req.query.keyword ? {
-    name:{
-      $regex:req.query.keyword,      //* help us to find the object with in a  minimum keyword 
-      $options:'i'
-    }
-  }:{}
+  console.log(page);
 
-  const products = await Product.find({...keyword}); //* either keyword is empty or value
+  const keyword = req.query.keyword
+    ? {
+        name: {
+          $regex: req.query.keyword, //* help us to find the object with in a  minimum keyword
+          $options: 'i', //* case insensetive
+        },
+      }
+    : {};
 
-  // res.status(401)
-  // throw new Error ('Not Authorized')
+  //* count the products/keyword products
+  const count = await Product.countDocuments({ ...keyword });
+  //* either keyword is empty or value
+  const products = await Product.find({ ...keyword })
+    .limit(pageSize)
+    .skip(pageSize * (page - 1));
 
-  res.json(products);
+  res.json({ products, page, pages: Math.ceil(count / pageSize) });
 });
 
 // get single product by id
@@ -111,6 +119,14 @@ const createProductReview = catchAsync(async (req, res) => {
   }
 });
 
+// create Review
+const topRatedProducts = catchAsync(async (req, res) => {
+  const products=await Product.find({}).sort({rating:-1}).limit(3)
+  res.json(products)
+
+});
+
+
 module.exports = {
   getProducts,
   getProduct,
@@ -118,4 +134,5 @@ module.exports = {
   createProduct,
   updateProduct,
   createProductReview,
+  topRatedProducts
 };
